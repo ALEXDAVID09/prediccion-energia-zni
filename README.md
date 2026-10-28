@@ -1,121 +1,549 @@
-# Sistema web ZNI: análisis automático y predicción de energía
+# ⚡ Sistema Web ZNI — Análisis y Predicción de Energía
 
-Aplicativo web que convierte el análisis de la **prestación del servicio de energía en las Zonas No Interconectadas (ZNI) de Colombia** en un sistema que recibe datos nuevos, verifica si el modelo puede procesarlos, genera el análisis exploratorio, produce predicciones, exporta reportes y permite reentrenar el modelo con control de versiones.
+Aplicación web desarrollada para analizar datos de prestación del servicio de energía en las **Zonas No Interconectadas (ZNI) de Colombia**, automatizar el análisis exploratorio de datos y generar predicciones de consumo energético mediante Machine Learning.
 
-**Qué predice:** la energía activa (kWh) que entregará cada localidad **el mes siguiente**, a partir de lo que pasó en los meses anteriores. Sirve para anticipar la demanda y planear el combustible y la logística, que en zonas remotas son muy costosos.
+El sistema permite cargar nuevos datos, validar su compatibilidad con el modelo, realizar análisis exploratorio, generar predicciones, consultar versiones del modelo, reentrenarlo y descargar reportes.
 
-Proyecto de la Fundación Universitaria Uniclaretiana · Integrantes: Alex David Moya Bejarano y Alex David Garcia Chala · Docente: Carlos Stiwar Asprilla Mosquera.
+> **Proyecto desarrollado por Alex David García Chala**  
+> Fundación Universitaria Uniclaretiana · Ingeniería de Sistemas
 
-## Requisitos e instalación
+---
 
-Python 3.10 o superior.
+## 🎯 ¿Qué problema resuelve?
+
+En las Zonas No Interconectadas de Colombia, la prestación del servicio de energía presenta desafíos relacionados con la planificación de la demanda, el combustible y la logística.
+
+Este proyecto busca apoyar ese proceso mediante un sistema capaz de **estimar la energía activa que entregará cada localidad durante el mes siguiente**, utilizando información histórica.
+
+El objetivo es convertir datos históricos en información útil para:
+
+- 📊 Analizar el comportamiento del consumo energético.
+- 🔮 Anticipar la demanda del siguiente mes.
+- ⛽ Apoyar la planificación del combustible.
+- 🚚 Mejorar la planificación logística.
+- 🧪 Validar automáticamente nuevos conjuntos de datos.
+- 🤖 Reentrenar y controlar diferentes versiones del modelo.
+
+---
+
+## 🧠 Machine Learning
+
+El modelo principal utilizado es:
+
+**HistGradientBoostingRegressor**
+
+El entrenamiento se realiza sobre:
+
+```text
+log(1 + kWh)
+```
+
+y utiliza una **validación temporal**, respetando el orden cronológico de los datos.
+
+### Evaluación
+
+| Métrica | Resultado |
+|---|---:|
+| MAE en escala log | **0,266** |
+| Mejora frente al baseline | **26,5 % menos error** |
+| Validación | Temporal |
+| Modelo | HistGradientBoostingRegressor |
+
+### División temporal
+
+```text
+Entrenamiento
+Hasta 2024-06
+
+        ↓
+
+Prueba
+2024-07 → 2025-06
+```
+
+El modelo también genera **intervalos de predicción del 80 %**, permitiendo representar la incertidumbre asociada a las predicciones.
+
+Más información sobre la metodología:
+
+`docs/documento_tecnico.md`
+
+---
+
+# 🚀 Funcionalidades
+
+## 📊 Análisis exploratorio automático
+
+El sistema permite cargar archivos CSV o Excel y generar automáticamente:
+
+- Tipos de variables.
+- Valores faltantes.
+- Valores atípicos.
+- Distribuciones.
+- Frecuencias.
+- Correlaciones.
+- Gráficos.
+- Reporte EDA descargable.
+
+---
+
+## 🔎 Validación de datos
+
+Antes de realizar una predicción, el sistema verifica la información recibida mediante diferentes niveles de validación.
+
+Se comprueba:
+
+- Existencia de variables requeridas.
+- Tipos de datos.
+- Valores faltantes.
+- Categorías.
+- Rangos permitidos.
+- Reglas de dominio.
+- Columnas adicionales.
+
+Esto evita generar predicciones cuando los datos no cumplen las condiciones necesarias.
+
+---
+
+## 🔮 Predicción
+
+Para archivos compatibles, el sistema genera:
+
+- Predicción de energía activa.
+- Intervalo de predicción del 80 %.
+- Tabla de resultados.
+- Gráfico de predicciones.
+- Exportación a CSV.
+- Exportación a Excel.
+- Reporte HTML.
+
+---
+
+## ♻️ Reentrenamiento y versiones del modelo
+
+El sistema permite incorporar nuevos datos etiquetados y generar una **versión candidata** del modelo.
+
+La nueva versión se compara con el modelo actualmente activo antes de decidir si debe reemplazarlo.
+
+El registro de versiones permite manejar estados como:
+
+```text
+Activo
+Candidato
+Histórico
+```
+
+Esto permite mantener trazabilidad sobre los modelos utilizados.
+
+---
+
+# 🌐 Aplicación web
+
+La API y la interfaz web funcionan dentro del mismo proyecto.
+
+### Secciones principales
+
+| Sección | Funcionalidad |
+|---|---|
+| 🏠 Inicio | Información general e indicadores del modelo |
+| 📊 Analizar datos | EDA automático de CSV y Excel |
+| 🔮 Validar y predecir | Validación y generación de predicciones |
+| 🧹 Preparar datos | Transformación del CSV original del portal |
+| 🤖 Modelo y versiones | Métricas, algoritmos y control de versiones |
+| 📄 Reportes | Historial y archivos descargables |
+| 🧪 Archivos de prueba | Ejecución de escenarios de validación |
+| ℹ️ Acerca del proyecto | Metodología, equipo y arquitectura |
+
+---
+
+# 🏗️ Arquitectura
+
+La aplicación está organizada en diferentes componentes para separar las responsabilidades del sistema.
+
+```text
+                    ┌──────────────────────┐
+                    │     Usuario Web      │
+                    └──────────┬───────────┘
+                               │
+                               ▼
+                    ┌──────────────────────┐
+                    │      FastAPI         │
+                    │       main.py        │
+                    └──────────┬───────────┘
+                               │
+             ┌─────────────────┼─────────────────┐
+             │                 │                 │
+             ▼                 ▼                 ▼
+       ┌───────────┐     ┌────────────┐    ┌────────────┐
+       │ Validación│     │    EDA     │    │   Modelo   │
+       └───────────┘     └────────────┘    └────────────┘
+             │                 │                 │
+             └─────────────────┼─────────────────┘
+                               ▼
+                    ┌──────────────────────┐
+                    │     Reportes         │
+                    │ CSV · Excel · HTML   │
+                    └──────────────────────┘
+```
+
+Diagrama completo:
+
+[Ver arquitectura](docs/arquitectura.png)
+
+---
+
+# 🛠️ Tecnologías
+
+### Lenguaje
+
+- Python 3.10+
+
+### Análisis y Machine Learning
+
+- Pandas
+- NumPy
+- Scikit-learn
+- Matplotlib
+
+### Backend
+
+- FastAPI
+- Uvicorn
+
+### Machine Learning
+
+- HistGradientBoostingRegressor
+- Joblib
+
+### Testing
+
+- Pytest
+
+### Frontend
+
+- HTML
+- CSS
+- JavaScript
+
+### Documentación y reportes
+
+- Markdown
+- HTML
+- CSV
+- Excel
+
+---
+
+# 📁 Estructura del proyecto
+
+```text
+zni-app/
+│
+├── app/
+│   ├── main.py
+│   ├── config.py
+│   ├── eda.py
+│   ├── limpieza.py
+│   ├── modelo.py
+│   ├── reportes.py
+│   ├── validacion.py
+│   │
+│   └── static/
+│       ├── index.html
+│       ├── css/
+│       ├── js/
+│       └── img/
+│
+├── config/
+│   └── esquema.json
+│
+├── datos/
+│   └── variables_modelo.csv
+│
+├── modelos/
+│   ├── registro.json
+│   └── v1/
+│       └── metadatos.json
+│
+├── pruebas/
+│   └── escenarios/
+│
+├── tests/
+│   └── test_escenarios.py
+│
+├── scripts/
+│   ├── entrenar_inicial.py
+│   └── generar_escenarios.py
+│
+├── docs/
+│   ├── arquitectura.png
+│   ├── arquitectura.svg
+│   ├── arquitectura.mmd
+│   ├── documento_tecnico.md
+│   └── evidencia/
+│
+├── requirements.txt
+├── README.md
+└── .gitignore
+```
+
+> Los datasets originales, modelos binarios y archivos generados se mantienen fuera del repositorio mediante `.gitignore`.
+
+---
+
+# ⚙️ Instalación
+
+## 1. Clonar el repositorio
 
 ```bash
+git clone https://github.com/ALEXDAVID09/prediccion-energia-zni.git
+cd prediccion-energia-zni
+```
+
+## 2. Crear entorno virtual
+
+### Windows
+
+```powershell
 python -m venv .venv
-source .venv/bin/activate        # en Windows: .venv\Scripts\activate
+```
+
+Activar:
+
+```powershell
+.venv\Scripts\activate
+```
+
+### Linux / macOS
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+## 3. Instalar dependencias
+
+```bash
 pip install -r requirements.txt
 ```
 
-El repositorio ya trae el modelo activo (`modelos/v1`). Para volver a generarlo desde el CSV del portal:
+---
 
-```bash
-python -m scripts.entrenar_inicial      # entrena la v1 y la deja como activa
-python -m scripts.generar_escenarios    # regenera los archivos de prueba
-```
+# ▶️ Ejecutar la aplicación
 
-## Iniciar la API y la interfaz
+Iniciar FastAPI:
 
 ```bash
 uvicorn app.main:app --reload
 ```
 
-- Sitio web: <http://localhost:8000/>
-- Documentación interactiva de la API (para probar cada operación): <http://localhost:8000/docs>
+La aplicación estará disponible en:
 
-El sitio lo sirve la misma API, así que no hay un segundo proceso que iniciar. Todo se usa desde ahí:
+```text
+http://localhost:8000/
+```
 
-| Sección del sitio | Qué hace |
-|---|---|
-| Inicio | Qué es el sistema, indicadores del modelo activo y los pasos de uso |
-| Analizar datos | EDA automático de cualquier CSV o Excel |
-| Validar y predecir | Validación en 4 niveles y predicciones con intervalo del 80%, gráfico y tabla |
-| Preparar datos del portal | Convierte el CSV del portal en la tabla del modelo; puede predecir en el mismo paso |
-| Modelo y versiones | Métricas, comparación de algoritmos, variables, reentrenamiento y decisión sobre candidatas |
-| Reportes | Historial de todas las cargas con sus reportes descargables |
-| Archivos de prueba | Los escenarios obligatorios: «Probar» los ejecuta directamente, «Descargar» los guarda |
-| Acerca del proyecto | Equipo, datos, metodología y diagrama de arquitectura |
+Documentación interactiva de la API:
 
-## Prueba completa (demostración)
+```text
+http://localhost:8000/docs
+```
 
-La forma más rápida es la sección **Archivos de prueba**: cada botón «Probar» carga el archivo y lo ejecuta en la sección correcta. Paso a paso:
+---
 
-1. **Analizar datos:** cargue `pruebas/escenarios/07_solo_eda_portal_crudo.csv`. El sistema detecta los tipos (incluye números en formato español y fechas), muestra faltantes, atípicos, frecuencias, correlaciones y gráficos, y deja descargar el reporte EDA.
-2. **Validar y predecir con un archivo incompatible:** cargue `03_tipo_incompatible.csv`. El estado sale *Incompatible*, se explica qué variable falla, qué se esperaba, qué se encontró y en qué filas. No se genera ninguna predicción.
-3. **Validar y predecir con un archivo compatible:** cargue `01_compatible.csv`. Se generan las predicciones con su intervalo del 80% y se descargan en CSV, Excel y HTML.
-4. **Modelo y versiones:** cargue `08_nuevos_etiquetados.csv`. Se valida, se integra, se reentrena y aparece una versión **candidata** comparada con la activa. Escriba una justificación y elija activarla o conservar la activa.
-5. **Preparar archivo del portal:** cargue el CSV original del portal de datos abiertos y descargue la tabla lista para predecir el mes siguiente.
+# 🧪 Pruebas automáticas
 
-## Pruebas automáticas
+El proyecto incluye pruebas automatizadas mediante **Pytest**.
+
+Ejecutar:
 
 ```bash
 pytest -q
 ```
 
-Cubren los 8 escenarios obligatorios. Trabajan sobre una copia temporal de `modelos/`, así que no cambian el modelo real.
+Los escenarios verifican diferentes situaciones de compatibilidad de los datos.
 
-| # | Archivo | Resultado esperado |
-|---|---|---|
-| 1 | `01_compatible.csv` | Compatible, predicciones generadas |
-| 2 | `02_falta_variable.csv` | Incompatible: falta `energia_lag1_kwh` |
-| 3 | `03_tipo_incompatible.csv` | Incompatible: texto en `mes_objetivo` y números con formato español en `energia_lag1_kwh` |
-| 4 | `04_faltantes.csv` | Incompatible: 5 faltantes en `energia_lag1_kwh` |
-| 5 | `05a_categoria_nueva_departamento.csv` | Compatible con advertencias: departamento no visto (se predice y se marca) |
-| 5 | `05b_categoria_fuera_de_escala.csv` | Incompatible: `tamano` fuera de la escala definida |
-| 6 | `06_columnas_adicionales.csv` | Compatible con advertencias: columnas que el modelo no usa |
-| 7 | `07_solo_eda_portal_crudo.csv` | Incompatible para predecir, pero el EDA funciona (y sugiere usar «Preparar») |
-| 7 | `07b_reglas_de_dominio.csv` | Incompatible: horas > 24, factor de carga > 1, `sin_servicio_lag1` incoherente |
-| 8 | `08_nuevos_etiquetados.csv` | Versión candidata creada sin reemplazar la activa |
-| extra | `09_pronostico_2026_02.csv` | Pronóstico real de febrero de 2026 (compatible con advertencias: faltan horas por el cambio de formato de la fuente) |
-
-## API
-
-| Operación | Método y ruta |
+| Escenario | Resultado |
 |---|---|
-| Analizar dataset (EDA) | `POST /api/eda` |
-| Validar compatibilidad | `POST /api/validar` (`modo` = `prediccion` o `actualizacion`) |
-| Generar predicciones | `POST /api/predecir` (responde 422 con el diagnóstico si el archivo es incompatible) |
-| Consultar modelo activo | `GET /api/modelo` |
-| Listar versiones | `GET /api/modelo/versiones` |
-| Actualizar y reentrenar | `POST /api/modelo/actualizar` |
-| Registrar decisión sobre una candidata | `POST /api/modelo/versiones/{version}/decision` |
-| Descargar reporte | `GET /api/reportes/{proceso}/{tipo}` |
-| Historial de cargas | `GET /api/procesos` |
-| Archivos de prueba | `GET /api/escenarios` y `GET /api/escenarios/{archivo}` |
-| Preparar CSV del portal | `POST /api/preparar` |
+| Archivo compatible | Predicción generada |
+| Variable faltante | Incompatible |
+| Tipo de dato incorrecto | Incompatible |
+| Valores faltantes | Incompatible |
+| Nueva categoría | Compatible con advertencia |
+| Valor fuera de escala | Incompatible |
+| Columnas adicionales | Compatible con advertencia |
+| Dataset del portal | EDA disponible |
+| Reglas de dominio | Incompatible |
+| Nuevos datos etiquetados | Nueva versión candidata |
 
-## Estructura
+---
 
+# 🔌 API
+
+| Operación | Método | Endpoint |
+|---|---|---|
+| Analizar dataset | POST | `/api/eda` |
+| Validar compatibilidad | POST | `/api/validar` |
+| Generar predicciones | POST | `/api/predecir` |
+| Consultar modelo activo | GET | `/api/modelo` |
+| Listar versiones | GET | `/api/modelo/versiones` |
+| Actualizar modelo | POST | `/api/modelo/actualizar` |
+| Decisión sobre versión | POST | `/api/modelo/versiones/{version}/decision` |
+| Descargar reporte | GET | `/api/reportes/{proceso}/{tipo}` |
+| Historial de cargas | GET | `/api/procesos` |
+| Listar escenarios | GET | `/api/escenarios` |
+| Obtener escenario | GET | `/api/escenarios/{archivo}` |
+| Preparar datos | POST | `/api/preparar` |
+
+---
+
+# 🧪 Demostración
+
+El proyecto incluye diferentes archivos de prueba para demostrar el comportamiento del sistema.
+
+### 1. EDA
+
+Utilizar:
+
+```text
+pruebas/escenarios/07_solo_eda_portal_crudo.csv
 ```
-app/
-  main.py          API FastAPI (orquesta todo)
-  validacion.py    validación en 4 niveles contra el esquema del modelo
-  eda.py           EDA automático según los tipos de variable
-  modelo.py        pipeline, validación temporal, predicción y versiones
-  limpieza.py      limpieza del CSV del portal (la de la Actividad 3) y variables rezagadas
-  reportes.py      reportes HTML
-  static/          sitio web (index.html, css/, js/, img/)
-config/esquema.json  variables, tipos, faltantes, categorías, rangos y exclusiones
-modelos/
-  registro.json    versiones: activo, candidato, histórico
-  v1/              pipeline.joblib, metadatos.json, datos_entrenamiento.csv
-datos/crudos/      CSV original del portal
-pruebas/escenarios/  archivos de los escenarios de prueba
-tests/             pruebas automáticas
-docs/              diagrama de arquitectura, documento técnico y evidencia de reportes
+
+El sistema analiza automáticamente las variables y genera el reporte exploratorio.
+
+### 2. Archivo incompatible
+
+Utilizar:
+
+```text
+pruebas/escenarios/03_tipo_incompatible.csv
 ```
 
-## El modelo en una línea
+El sistema identifica los errores y evita generar una predicción.
 
-`HistGradientBoostingRegressor` sobre log(1 + kWh), con validación temporal (entrena hasta 2024-06, prueba de 2024-07 a 2025-06). Métrica principal: MAE en escala log = **0,266**, un **26,5% menos error** que repetir el valor del mes anterior. Detalle en `docs/documento_tecnico.md`.
+### 3. Archivo compatible
 
-![Arquitectura](docs/arquitectura.png)
+Utilizar:
+
+```text
+pruebas/escenarios/01_compatible.csv
+```
+
+Se generan las predicciones junto con su intervalo de confianza.
+
+### 4. Actualización del modelo
+
+Utilizar:
+
+```text
+pruebas/escenarios/08_nuevos_etiquetados.csv
+```
+
+El sistema genera una nueva versión candidata y la compara con el modelo activo.
+
+---
+
+# 📸 Evidencias
+
+### Análisis exploratorio
+
+![EDA](docs/evidencia/01_eda.png)
+
+### Validación de datos
+
+![Validación](docs/evidencia/02_incompatible.png)
+
+### Predicciones
+
+![Predicciones](docs/evidencia/03_predicciones.png)
+
+### Actualización del modelo
+
+![Actualización](docs/evidencia/04_actualizacion.png)
+
+### Interfaz adaptable
+
+![Interfaz móvil](docs/evidencia/05_movil.png)
+
+---
+
+# 📊 Resultados
+
+El modelo principal obtuvo:
+
+```text
+MAE log = 0.266
+```
+
+representando aproximadamente:
+
+```text
+26.5 % menos error
+```
+
+respecto al baseline utilizado como referencia.
+
+La evaluación se realizó mediante una estrategia temporal para evitar utilizar información futura durante el entrenamiento.
+
+---
+
+# 🔬 Metodología
+
+El flujo general del sistema es:
+
+```text
+Datos originales
+       ↓
+Limpieza y preparación
+       ↓
+Variables temporales
+       ↓
+Validación
+       ↓
+Análisis exploratorio
+       ↓
+Entrenamiento
+       ↓
+Validación temporal
+       ↓
+Predicción
+       ↓
+Intervalo del 80 %
+       ↓
+Reportes
+```
+
+---
+
+# 👨‍💻 Autor
+
+## Alex David García Chala
+
+**Estudiante de Ingeniería de Sistemas**
+
+Intereses profesionales:
+
+- 📊 Data Analytics
+- 📈 Business Intelligence
+- 🤖 Machine Learning
+- 🐍 Python
+- 🗄️ SQL
+- 📊 Visualización de datos
+- 🚀 Desarrollo de soluciones basadas en datos
+
+---
+
+# 📚 Documentación
+
+Para conocer con mayor detalle la metodología, arquitectura y decisiones técnicas del proyecto:
+
+- `docs/documento_tecnico.md`
+- `docs/arquitectura.png`
+- `docs/arquitectura.mmd`
+
+---
+
+## ⭐ Proyecto de portafolio
+
+Este proyecto representa la aplicación de conocimientos de **análisis de datos, Machine Learning, desarrollo backend, automatización, validación de datos, pruebas y documentación técnica** en una solución orientada a un problema real.
+
+**Desarrollado por Alex David García Chala · Ingeniería de Sistemas**
