@@ -1,0 +1,41 @@
+{
+  "versiones": [
+    {
+      "version": "v1",
+      "fecha_entrenamiento": "2026-10-27T09:22:36",
+      "registros": 4708,
+      "variables": [
+        "departamento",
+        "tamano",
+        "mes_objetivo",
+        "energia_lag1_kwh",
+        "energia_lag2_kwh",
+        "energia_lag12_kwh",
+        "horas_dia_lag1",
+        "factor_carga_lag1",
+        "sin_servicio_lag1"
+      ],
+      "algoritmo": "HistGradientBoostingRegressor",
+      "configuracion": {
+        "algoritmo": "HistGradientBoostingRegressor",
+        "loss": "squared_error",
+        "learning_rate": 0.03,
+        "max_iter": 300,
+        "max_leaf_nodes": 31,
+        "min_samples_leaf": 20,
+        "l2_regularization": 1.0,
+        "random_state": 42,
+        "objetivo_transformado": "log1p / expm1"
+      },
+      "metricas": {
+        "mae_log": 0.2663,
+        "wape_pct": 8.22,
+        "mejora_vs_ingenuo_pct": 26.5
+      },
+      "archivo": "modelos/v1/pipeline.joblib",
+      "estado": "activo",
+      "nota": "Versión inicial (meses objetivo hasta 2025-06)",
+      "decision": null
+    }
+  ]
+}

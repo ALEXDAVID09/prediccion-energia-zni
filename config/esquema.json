@@ -1,0 +1,47 @@
+{
+  "descripcion": "Esquema de la tabla de entrada del modelo de energía del mes siguiente por localidad ZNI. Cada fila es una localidad y un mes objetivo; las variables describen meses ANTERIORES al objetivo para evitar fuga de información.",
+  "unidad_de_observacion": "localidad x mes objetivo",
+  "objetivo": {
+    "nombre": "energia_objetivo_kwh",
+    "tipo": "numerica",
+    "unidad": "kWh",
+    "rango": [0, null],
+    "descripcion": "Energía activa entregada por la localidad en el mes objetivo. El modelo la aprende en escala log(1 + kWh)."
+  },
+  "variables": [
+    {"nombre": "departamento", "tipo": "categorica", "admite_nulos": false, "categorias": "aprendidas_en_entrenamiento",
+     "desconocidas": "advertencia",
+     "estrategia_desconocidas": "OneHotEncoder(handle_unknown='ignore'): una categoría nueva queda con todas sus columnas en 0 y la predicción se apoya en las demás variables. Se avisa al usuario.",
+     "descripcion": "Departamento de la localidad (nombre oficial por código DANE)."},
+    {"nombre": "tamano", "tipo": "categorica", "admite_nulos": false,
+     "categorias": ["Muy pequeña", "Pequeña", "Mediana", "Grande"], "desconocidas": "error",
+     "estrategia_desconocidas": "Escala cerrada definida en el análisis (mediana de energía mensual: <5, 5-50, 50-500, >500 MWh/mes). Un valor fuera de la escala bloquea la predicción.",
+     "descripcion": "Tamaño de la localidad según la mediana de su energía mensual positiva en los meses anteriores al objetivo."},
+    {"nombre": "mes_objetivo", "tipo": "entero", "admite_nulos": false, "rango": [1, 12],
+     "descripcion": "Mes que se quiere predecir (estacionalidad)."},
+    {"nombre": "energia_lag1_kwh", "tipo": "numerica", "admite_nulos": false, "rango": [0, null],
+     "descripcion": "Energía activa del mes anterior al objetivo (kWh). Sin este dato no hay predicción."},
+    {"nombre": "energia_lag2_kwh", "tipo": "numerica", "admite_nulos": true, "rango": [0, null],
+     "descripcion": "Energía activa de dos meses antes (kWh). Puede faltar si la localidad no reportó."},
+    {"nombre": "energia_lag12_kwh", "tipo": "numerica", "admite_nulos": true, "rango": [0, null],
+     "descripcion": "Energía activa del mismo mes del año anterior (kWh). Puede faltar."},
+    {"nombre": "horas_dia_lag1", "tipo": "numerica", "admite_nulos": true, "rango": [0, 24],
+     "descripcion": "Horas promedio de servicio al día en el mes anterior. Falta desde 2025-12 por la pérdida de la coma decimal en la fuente."},
+    {"nombre": "factor_carga_lag1", "tipo": "numerica", "admite_nulos": true, "rango": [0, 1],
+     "descripcion": "Energía / (potencia máxima x horas del mes) del mes anterior. Mayor que 1 es físicamente imposible."},
+    {"nombre": "sin_servicio_lag1", "tipo": "entero", "admite_nulos": false, "rango": [0, 1],
+     "descripcion": "1 si la energía del mes anterior fue 0 (sin servicio o sin dato)."}
+  ],
+  "referencias": [
+    {"nombre": "id_localidad", "tipo": "texto", "obligatoria_para": ["actualizacion"],
+     "descripcion": "Código de la localidad. Relaciona cada predicción con su registro; no se usa como predictor."},
+    {"nombre": "localidad", "tipo": "texto", "obligatoria_para": [], "descripcion": "Nombre de la localidad (solo para lectura)."},
+    {"nombre": "anio_objetivo", "tipo": "entero", "rango": [2000, 2100], "obligatoria_para": ["actualizacion"],
+     "descripcion": "Año del mes objetivo. Se usa para ordenar en el tiempo y para la validación temporal, no como predictor."}
+  ],
+  "no_enviar_al_modelo": ["id_localidad", "localidad", "anio_objetivo", "energia_objetivo_kwh"],
+  "reglas_entre_variables": [
+    {"nombre": "sin_servicio_coherente", "descripcion": "sin_servicio_lag1 debe ser 1 exactamente cuando energia_lag1_kwh es 0.", "severidad": "error"},
+    {"nombre": "registro_unico", "descripcion": "No debería haber dos filas con la misma localidad y el mismo mes objetivo.", "severidad": "advertencia"}
+  ]
+}

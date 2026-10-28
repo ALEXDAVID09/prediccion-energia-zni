@@ -1,0 +1,44 @@
+# Entornos virtuales
+.venv/
+venv/
+env/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Pytest
+.pytest_cache/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Datos procesados
+datos/procesos/
+
+# Dataset original
+datos/crudos/
+
+# Modelos pesados
+modelos/v1/*.joblib
+modelos/v1/datos_entrenamiento.csv
+
+# Reportes generados
+docs/evidencia/reportes/
+
+# Variables de entorno
+.env
+.env.*
+!.env.example
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Temporales
+*.tmp
+*.temp

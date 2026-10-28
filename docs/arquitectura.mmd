@@ -1,0 +1,17 @@
+flowchart LR
+    U([Usuario en el navegador]) --> UI["Interfaz web<br/>app/static/index.html"]
+    UI -->|HTTP / JSON| API["API FastAPI<br/>app/main.py"]
+    API --> VAL["Módulo de validación<br/>app/validacion.py"]
+    API --> EDA["Módulo de EDA automático<br/>app/eda.py"]
+    API --> PIPE["Pipeline predictivo<br/>app/modelo.py"]
+    API --> REP["Módulo de reportes<br/>app/reportes.py"]
+    API --> ACT["Actualización del modelo<br/>reentrenar · comparar · decidir"]
+    API --> PREP["Preparación de datos del portal<br/>app/limpieza.py"]
+    VAL -.lee esquema.-> META[("metadatos.json<br/>esquema y reglas")]
+    PIPE -.carga sin reajustar.-> JOB[("pipeline.joblib")]
+    ACT --> REG[("modelos/registro.json<br/>v1, v2… activo / candidato / histórico")]
+    REG --- META
+    REG --- JOB
+    REG --- DAT[("datos_entrenamiento.csv<br/>por versión")]
+    REP --> OUT[("datos/procesos/&lt;id&gt;<br/>HTML · CSV · Excel · JSON")]
+    CFG[("config/esquema.json")] -.se copia al entrenar.-> META

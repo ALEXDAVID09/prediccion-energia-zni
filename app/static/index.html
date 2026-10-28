@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Energía ZNI</title>
+<meta name="description" content="Análisis automático y predicción de la energía del mes siguiente en las Zonas No Interconectadas de Colombia.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%231f6fcf'/%3E%3Cpath d='M13 4 6 13h5l-1 7 7-9h-5z' fill='white'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="css/estilos.css">
+</head>
+<body>
+<div class="marco">
+  <aside class="lateral" id="lateral" aria-label="Navegación principal">
+    <a class="marca" href="#inicio">
+      <svg width="34" height="34" viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="7" fill="var(--acc)"/><path d="M13 4 6 13h5l-1 7 7-9h-5z" fill="#fff"/></svg>
+      <span><b>Energía ZNI</b><span>Zonas No Interconectadas</span></span>
+    </a>
+    <a class="nav" href="#inicio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 11 12 4l9 7v9H5v-9"/></svg>Inicio</a>
+    <div class="grupo">Usar el sistema</div>
+    <a class="nav" href="#analizar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Analizar datos</a>
+    <a class="nav" href="#predecir"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 17l6-6 4 4 8-8M15 7h6v6"/></svg>Validar y predecir</a>
+    <a class="nav" href="#preparar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h10l6 6v10H4zM14 4v6h6M8 15h8"/></svg>Preparar datos del portal</a>
+    <a class="nav" href="#modelo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2"/></svg>Modelo y versiones</a>
+    <div class="grupo">Resultados y recursos</div>
+    <a class="nav" href="#reportes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3h12v18H6zM9 8h6M9 12h6M9 16h4"/></svg>Reportes</a>
+    <a class="nav" href="#ejemplos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16M4 12h16M4 17h10"/></svg>Archivos de prueba</a>
+    <a class="nav" href="#acerca"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg>Acerca del proyecto</a>
+    <a class="nav" href="/docs" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 9l-4 3 4 3M16 9l4 3-4 3M13 6l-2 12"/></svg>API (documentación)</a>
+    <div class="pie"><span class="modelo-chip"><span class="punto"></span><span id="chip-modelo">Conectando…</span></span></div>
+  </aside>
+
+  <div class="contenido">
+    <div class="barra-movil"><button id="abrir-menu" aria-label="Abrir menú">☰ Menú</button><b>Energía ZNI</b><span></span></div>
+
+    <!-- INICIO -->
+    <section class="pagina" id="p-inicio">
+      <div class="heroe">
+        <h1>Anticipa la energía que necesitará cada localidad el próximo mes</h1>
+        <p>En las Zonas No Interconectadas la electricidad se genera en el sitio, casi siempre con diésel que llega por río o por aire. Este sistema analiza los datos de prestación del servicio, verifica que sean confiables y predice la energía activa del mes siguiente para planear combustible y logística.</p>
+        <div class="acciones">
+          <a class="btn" href="#ejemplos">Probar con un archivo de ejemplo</a>
+          <a class="btn sec" href="#predecir">Cargar mis datos</a>
+        </div>
+      </div>
+      <div class="kpis" id="inicio-kpis"></div>
+      <h2 style="font-size:18px;margin:26px 0 12px">Cómo se usa</h2>
+      <div class="pasos">
+        <a class="paso" href="#preparar"><b>Prepare los datos</b><span>Convierta el CSV del portal de datos abiertos en la tabla que entiende el modelo.</span></a>
+        <a class="paso" href="#analizar"><b>Analice el archivo</b><span>El sistema detecta los tipos de variable y genera el análisis exploratorio con gráficos.</span></a>
+        <a class="paso" href="#predecir"><b>Valide la compatibilidad</b><span>Esquema, tipos, contenido y reglas de dominio. Si algo falla, explica qué y dónde.</span></a>
+        <a class="paso" href="#predecir"><b>Genere predicciones</b><span>Energía del mes siguiente por localidad, con un intervalo del 80%.</span></a>
+        <a class="paso" href="#reportes"><b>Descargue los reportes</b><span>EDA, compatibilidad, predicciones (CSV y Excel) y actualización del modelo.</span></a>
+        <a class="paso" href="#modelo"><b>Actualice el modelo</b><span>Con datos reales nuevos se crea una versión candidata que usted decide activar o no.</span></a>
+      </div>
+    </section>
+
+    <!-- ANALIZAR -->
+    <section class="pagina" id="p-analizar">
+      <div class="encabezado"><h1>Analizar datos</h1><p>Análisis exploratorio automático de cualquier CSV o Excel, aunque no sirva para el modelo. El sistema decide qué estadísticas y gráficos mostrar según el tipo de cada variable.</p></div>
+      <div class="panel">
+        <div class="zona" data-zona="eda"></div>
+        <div class="acciones"><button class="btn" id="btn-eda">Analizar</button></div>
+      </div>
+      <div id="r-eda"></div>
+    </section>
+
+    <!-- PREDECIR -->
+    <section class="pagina" id="p-predecir">
+      <div class="encabezado"><h1>Validar y predecir</h1><p>Antes de predecir, el archivo pasa por cuatro niveles de validación. Si es incompatible no se genera ninguna predicción: el sistema explica el problema, usted corrige el archivo y lo vuelve a cargar.</p></div>
+      <div class="panel">
+        <div class="zona" data-zona="pred"></div>
+        <div class="acciones"><button class="btn" id="btn-predecir">Validar y predecir</button><button class="btn sec" id="btn-validar">Solo validar</button>
+          <a class="nota" href="#ejemplos">¿No tiene un archivo? Use uno de prueba</a></div>
+      </div>
+      <div id="r-pred"></div>
+    </section>
+
+    <!-- PREPARAR -->
+    <section class="pagina" id="p-preparar">
+      <div class="encabezado"><h1>Preparar datos del portal</h1><p>Convierte el CSV original «Estado de la prestación del servicio de energía en Zonas No Interconectadas» en la tabla del modelo, aplicando la limpieza documentada en el análisis (formato numérico, nombres por código DANE, códigos de localidad corregidos).</p></div>
+      <div class="panel">
+        <div class="zona" data-zona="prep"></div>
+        <label class="campo" for="prep-tipo">¿Para qué la va a usar?</label>
+        <select id="prep-tipo"><option value="prediccion">Predecir el mes siguiente al último del archivo</option><option value="etiquetados">Actualizar el modelo (pares con la energía real)</option></select>
+        <div class="acciones"><button class="btn" id="btn-prep">Preparar y descargar</button><button class="btn sec" id="btn-prep-usar">Preparar y predecir ahora</button></div>
+      </div>
+      <div id="r-prep"></div>
+    </section>
+
+    <!-- MODELO -->
+    <section class="pagina" id="p-modelo">
+      <div class="encabezado"><h1>Modelo y versiones</h1><p>Qué modelo está activo, cómo se validó, qué variables usa y cómo actualizarlo con datos nuevos sin perder la versión anterior.</p></div>
+      <div id="m-activo"><div class="cargando"><span class="giro"></span>Cargando modelo…</div></div>
+      <div class="panel">
+        <h2>Actualizar con datos reales y reentrenar</h2>
+        <p class="ayuda">Cargue registros que ya tengan la energía real (<code>energia_objetivo_kwh</code>). Se validan, se integran, se reentrena y aparece una versión <b>candidata</b>. La activa no se reemplaza hasta que usted registre una decisión justificada.</p>
+        <div class="zona" data-zona="act"></div>
+        <div class="acciones"><button class="btn" id="btn-act">Validar y reentrenar</button></div>
+        <div id="r-act"></div>
+      </div>
+      <div class="panel"><h2>Historial de versiones</h2><div id="m-versiones"></div></div>
+    </section>
+
+    <!-- REPORTES -->
+    <section class="pagina" id="p-reportes">
+      <div class="encabezado"><h1>Reportes</h1><p>Cada archivo que se carga queda registrado con sus reportes descargables: análisis exploratorio, compatibilidad, predicciones y actualización del modelo.</p></div>
+      <div class="panel"><div class="acciones" style="margin:0 0 10px"><button class="btn sec chico" id="btn-recargar">Actualizar lista</button></div><div id="r-reportes"></div></div>
+    </section>
+
+    <!-- EJEMPLOS -->
+    <section class="pagina" id="p-ejemplos">
+      <div class="encabezado"><h1>Archivos de prueba</h1><p>Archivos preparados para demostrar cada escenario obligatorio. «Probar» los carga directamente en la sección que corresponde; «Descargar» los guarda para revisarlos o modificarlos.</p></div>
+      <div class="panel"><div id="r-ejemplos"></div></div>
+    </section>
+
+    <!-- ACERCA -->
+    <section class="pagina" id="p-acerca">
+      <div class="encabezado"><h1>Acerca del proyecto</h1><p>Actividad integradora del curso de Sistemas Inteligentes, Fundación Universitaria Uniclaretiana.</p></div>
+      <div class="rejilla r2">
+        <div class="panel"><h2>Equipo</h2><ul class="limpia"><li>Alex David Moya Bejarano</li><li>Alex David Garcia Chala</li></ul><p class="nota">Docente: Carlos Stiwar Asprilla Mosquera</p></div>
+        <div class="panel"><h2>Datos</h2><p class="ayuda" style="margin:0">Base abierta «Estado de la prestación del servicio de energía en Zonas No Interconectadas», enero de 2020 a enero de 2026. Una fila por localidad y mes, con energía activa y reactiva, potencia máxima, fecha de demanda máxima y horas de servicio.</p></div>
+      </div>
+      <div class="panel" id="acerca-modelo"><h2>Metodología</h2></div>
+      <div class="panel"><h2>Arquitectura</h2><p class="ayuda">La interfaz consume la API; la API coordina validación, EDA, pipeline, reportes y versiones. Las reglas de validación viven en archivos de metadatos, no en la interfaz.</p>
+        <img class="diagrama" src="img/arquitectura.png" alt="Diagrama: interfaz web, API FastAPI, módulos de validación, EDA, pipeline, reportes y almacenamiento de versiones"></div>
+    </section>
+  </div>
+</div>
+<div class="tip" id="tip"></div>
+<script src="js/app.js"></script>
+</body>
+</html>
